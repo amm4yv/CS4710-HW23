@@ -30,28 +30,16 @@ class Negotiator(BaseNegotiator):
         for list in permutations:
             value = self.get_similarity(list, self.preferences)
             templist.append((list, value))
-        #print(self.utilities)
         self.utilities = sorted(templist, key=lambda x: float(x[1]), reverse=True)
-        #print(self.utilities)
-        # for x in self.utilities:
-        #     print(x)
-        #self.level_utility = int(self.utilities[0][1])
-
-
-    def get_similarity(self, list1, list2):
-        total = len(list2)
-        return reduce(lambda points, item: points + ((total / (list1.index(item) + 1)) - abs(list1.index(item) - list2.index(item))), list1, 0)
+        self.count = 0
+        self.other_utility = 0
+        self.other_offers = []
+        self.level_index = 0
 
 
     def make_offer(self, offer):
-        # if random() < 0.10 and offer:
-        #     # Very important - we save the offer we're going to return as self.offer
-        #     self.offer = offer[:]
-        #     return offer
         self.other_offers.append(offer)
-
         utility = self.utility()
-
         self.count += 1
 
         if self.count < 2:
@@ -73,30 +61,10 @@ class Negotiator(BaseNegotiator):
                     if rank > highest:
                         highest = rank
                         self.offer = list[0]
-                    #print(str(self.get_similarity(offer, list[0])) + " " + str(list[1]))
-            #print(self.offer)
             self.level_index += levels
             if self.level_index >= len(self.utilities):
                 self.level_index = len(self.utilities - 1)
             return self.offer
-
-        if False:
-            #print(self.other_offers)
-            print(self.other_utility)
-            print(self.utility())
-            print(self.count)
-
-        # if self.count == self.iter_limit:
-        #     self.offer = offer[:]
-        #     return offer
-        # if utility > self.other_utility:
-        #     self.offer = offer[:]
-        #     return offer
-        # if random() < 0.50:
-        #     ordering = self.preferences
-        #     shuffle(ordering)
-        #     self.offer = ordering[:]
-        #     return self.offer
         else:
             return self.offer
 
@@ -108,6 +76,10 @@ class Negotiator(BaseNegotiator):
                     if offer == list[0]:
                         return True
         return False
+
+    def get_similarity(self, list1, list2):
+        total = len(list2)
+        return reduce(lambda points, item: points + ((total / (list1.index(item) + 1)) - abs(list1.index(item) - list2.index(item))), list1, 0)
 
 
     def other_is_stubborn(self):
