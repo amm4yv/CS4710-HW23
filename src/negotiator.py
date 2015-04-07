@@ -54,8 +54,6 @@ class Negotiator(BaseNegotiator):
 
         self.count += 1
 
-
-
         if self.count < 2:
             ordering = self.preferences
             self.offer = ordering[:]
@@ -78,6 +76,8 @@ class Negotiator(BaseNegotiator):
                     #print(str(self.get_similarity(offer, list[0])) + " " + str(list[1]))
             #print(self.offer)
             self.level_index += levels
+            if self.level_index >= len(self.utilities):
+                self.level_index = len(self.utilities - 1)
             return self.offer
 
         if False:
