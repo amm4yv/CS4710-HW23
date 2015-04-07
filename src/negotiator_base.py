@@ -12,7 +12,8 @@ class BaseNegotiator:
         self.count = 0
         self.other_utility = 0
         self.utilities = []
-        self.lists = []
+        self.other_offers = []
+        self.level_index = 0
 
     # initialize(self : BaseNegotiator, preferences : list(String), iter_limit : Int)
         # Performs per-round initialization - takes in a list of items, ordered by the item's
@@ -21,17 +22,17 @@ class BaseNegotiator:
     def initialize(self, preferences, iter_limit):
         self.preferences = preferences
         self.iter_limit = iter_limit
-        self.lists = itertools.permutations(preferences)
+        permutations = itertools.permutations(preferences)
         templist = []
-        for list in self.lists:
+        for list in permutations:
             value = self.get_utility(list)
             templist.append((list, value))
         #print(self.utilities)
 
         self.utilities = sorted(templist, key=lambda x: float(x[1]), reverse=True)
         #print(self.utilities)
-        for x in self.utilities:
-            print(x)
+        # for x in self.utilities:
+        #     print(x)
 
 
     def get_utility(self, list):
