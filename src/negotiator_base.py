@@ -9,11 +9,7 @@ class BaseNegotiator:
         self.preferences = []
         self.offer = []
         self.iter_limit = 0
-        self.count = 0
-        self.other_utility = 0
-        self.utilities = []
-        self.other_offers = []
-        self.level_index = 0
+
 
     # initialize(self : BaseNegotiator, preferences : list(String), iter_limit : Int)
         # Performs per-round initialization - takes in a list of items, ordered by the item's

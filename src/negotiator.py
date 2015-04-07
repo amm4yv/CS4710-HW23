@@ -1,6 +1,7 @@
 from random import random, shuffle
 from functools import reduce
 from negotiator_base import BaseNegotiator
+import itertools
 
 
 # Example negotiator implementation, which randomly chooses to accept
@@ -11,9 +12,34 @@ from negotiator_base import BaseNegotiator
 class Negotiator(BaseNegotiator):
     # Override the make_offer method from BaseNegotiator to accept a given offer 5%
     # of the time, and return a random permutation the rest of the time.
+    def __init__(self):
+        self.preferences = []
+        self.offer = []
+        self.iter_limit = 0
+        self.count = 0
+        self.other_utility = 0
+        self.utilities = []
+        self.other_offers = []
+        self.level_index = 0
+
+    def initialize(self, preferences, iter_limit):
+        self.preferences = preferences
+        self.iter_limit = iter_limit
+        permutations = itertools.permutations(preferences)
+        templist = []
+        for list in permutations:
+            value = self.get_similarity(list, self.preferences)
+            templist.append((list, value))
+        #print(self.utilities)
+        self.utilities = sorted(templist, key=lambda x: float(x[1]), reverse=True)
+        #print(self.utilities)
+        # for x in self.utilities:
+        #     print(x)
+        #self.level_utility = int(self.utilities[0][1])
+
 
     def get_similarity(self, list1, list2):
-        total = len(list1)
+        total = len(list2)
         return reduce(lambda points, item: points + ((total / (list1.index(item) + 1)) - abs(list1.index(item) - list2.index(item))), list1, 0)
 
 
@@ -28,25 +54,30 @@ class Negotiator(BaseNegotiator):
 
         self.count += 1
 
-        if self.count < 3:
+
+
+        if self.count < 2:
             ordering = self.preferences
             self.offer = ordering[:]
+            #print(self.utilities)
             return self.offer
         if self.offer_is_acceptable(offer) or self.count == self.iter_limit:
             self.offer = offer[:]
             return offer
-        if self.other_is_stubborn():
-            level1 = int(self.utilities[self.level_index][1])
+        if offer != None:
+            level = int(self.utilities[self.level_index][1])
+            levels = 0
             highest = 0
             for list in self.utilities:
-                if int(list[1]) == level1:
+                if int(list[1]) == level:
+                    levels += 1
                     rank = self.get_similarity(offer, list[0])
                     if rank > highest:
                         highest = rank
                         self.offer = list[0]
                     #print(str(self.get_similarity(offer, list[0])) + " " + str(list[1]))
             #print(self.offer)
-            self.level_index += 1
+            self.level_index += levels
             return self.offer
 
         if False:
@@ -70,18 +101,27 @@ class Negotiator(BaseNegotiator):
             return self.offer
 
     def offer_is_acceptable(self, offer):
-        level = int(self.utilities[self.level_index][1])
-        for list in self.utilities:
-            if int(list[1]) == level:
-                if offer == list[0]:
-                    return True
+        for x in range(0, self.level_index):
+            level = int(self.utilities[x][1])
+            for list in self.utilities:
+                if int(list[1]) == level:
+                    if offer == list[0]:
+                        return True
         return False
 
 
     def other_is_stubborn(self):
         return self.other_offers[len(self.other_offers)-2] == self.other_offers[len(self.other_offers)-1]
 
+      # receive_utility(self : BaseNegotiator, utility : Float)
+        # Store the utility the other negotiator received from their last offer
+    def receive_utility(self, utility):
+        self.other_utility = utility
 
+    # receive_results(self : BaseNegotiator, results : (Boolean, Float, Float, Int))
+        # Store the results of the last series of negotiation (points won, success, etc.)
+    def receive_results(self, results):
+        (result, points_a, points_b, count) = results
 
 
 class RandomNegotiator(BaseNegotiator):
